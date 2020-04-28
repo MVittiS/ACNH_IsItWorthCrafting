@@ -4,7 +4,7 @@
 # "
 #    But we don't do things because they're easy, hm?
 #    We do them because they are profitable!
-# " - Tom Nook
+# " - Tom Nook, 2020
 
 import csv
 import json
@@ -40,12 +40,13 @@ if __name__ == "__main__":
 
     table_file = open('NewHorizons_ItemBOM.csv', 'w')
     table = csv.writer(table_file)
-    table.writerow(['Item Name', 'BOM Cost', 'Sells for', 'Profit (%)'])
+    table.writerow(['Item Name', 'BOM Cost', 'Sells for', 'Profit (Bells)',
+                    'Profit (%)', 'Bought for (Bells)', 'Vs. Store Savings (Bells)'])
 
 
     for item in sellable_items:
         item_BOM = item['games']['nh']['recipe']
-        item_cost = 0
+        item_BOM_cost = 0
         for key, amount in item_BOM.items():
             ingredient_list = [item for item in new_horizon_items
                                if item['id'] == key]
@@ -58,15 +59,28 @@ if __name__ == "__main__":
                 #  in villagerdb, such as Fossils and Bells
                 continue
 
-            item_cost += amount * ingredient['games']['nh']['sellPrice']['value']
+            item_BOM_cost += amount * ingredient['games']['nh']['sellPrice']['value']
 
-        if item_cost is 0:
+        if item_BOM_cost is 0:
             continue
 
         # Uncomment for text output
-        print(f"{item['name']} costs {item_cost} to make, "
-              f"and sells for {item['games']['nh']['sellPrice']['value']}")
+        #print(f"{item['name']} costs {item_BOM_cost} to make, "
+        #      f"and sells for {item['games']['nh']['sellPrice']['value']}")
 
-        this_item_price = item['games']['nh']['sellPrice']['value']
-        table.writerow([item['name'], item_cost, this_item_price,
-                        f'{100 * (this_item_price/item_cost - 1):5.2f}'])
+        item_sell_price = item['games']['nh']['sellPrice']['value']
+        item_buy_price = 0
+        try:
+            item_buy_price = \
+                item['games']['nh']['buyPrices'][0]['value'] \
+                if item['games']['nh']['buyPrices'][0]['currency'] == 'bells' \
+                else 0
+        except:
+            pass
+        
+        table.writerow(
+            [item['name'], item_BOM_cost, item_sell_price,
+            item_sell_price - item_BOM_cost,
+            f'{100 * (item_sell_price/item_BOM_cost - 1):5.2f}',
+            item_buy_price if item_buy_price > 0 else ' ',
+            (item_buy_price - item_sell_price) if item_buy_price > 0 else ' '])
