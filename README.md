@@ -10,7 +10,7 @@ After making sure you have Python 3 in your system, go to a command prompt / ter
 
 You just need to first clone this repository:
 ```
-git clone REPONAME
+git clone https://github.com/MVittiS/ACNH_IsItWorthCrafting
 ```
 
 Then, clone `villagerDB` inside of it:
